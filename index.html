@@ -50,7 +50,138 @@
   a { color: inherit; text-decoration: none; }
   button { color: inherit; font: inherit; cursor: pointer; }
 
-  /* ===== LOADING SCREEN ===== */
+  /* ===== FAKE DOWNLOAD SCREEN ===== */
+  .downloader {
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(135deg, #06060a 0%, #0f0a1a 100%);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    transition: opacity 0.5s ease, visibility 0.5s;
+  }
+  .downloader.hide {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+  .dl-card {
+    background: rgba(22, 22, 30, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(139, 92, 246, 0.25);
+    border-radius: 20px;
+    padding: 26px 24px;
+    width: 100%;
+    max-width: 380px;
+    box-shadow: 0 20px 60px rgba(139, 92, 246, 0.15), 0 0 0 1px rgba(139, 92, 246, 0.05) inset;
+    animation: dlCardIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  @keyframes dlCardIn {
+    from { opacity: 0; transform: translateY(20px) scale(0.95); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .dl-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 22px;
+  }
+  .dl-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    box-shadow: 0 8px 24px var(--accent-glow);
+    flex-shrink: 0;
+    animation: dlIconPulse 2s ease-in-out infinite;
+  }
+  @keyframes dlIconPulse {
+    0%, 100% { transform: scale(1); box-shadow: 0 8px 24px var(--accent-glow); }
+    50% { transform: scale(1.05); box-shadow: 0 12px 32px var(--accent-glow); }
+  }
+  .dl-meta { flex: 1; min-width: 0; }
+  .dl-filename {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin-bottom: 4px;
+    font-family: 'SF Mono', 'Courier New', monospace;
+  }
+  .dl-info { font-size: 11.5px; color: var(--text-muted); }
+  .dl-progress-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .dl-percent {
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--accent);
+    font-family: 'SF Mono', 'Courier New', monospace;
+  }
+  .dl-status {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: 'SF Mono', 'Courier New', monospace;
+  }
+  .dl-bar {
+    height: 6px;
+    background: #1a1a22;
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 14px;
+    position: relative;
+  }
+  .dl-bar-fill {
+    height: 100%;
+    width: 0;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    border-radius: 3px;
+    transition: width 0.1s linear;
+    box-shadow: 0 0 12px var(--accent-glow);
+    position: relative;
+  }
+  .dl-bar-fill::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    animation: dlShine 1.5s linear infinite;
+  }
+  @keyframes dlShine {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(100%); }
+  }
+  .dl-stats {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10.5px;
+    color: var(--text-muted);
+    font-family: 'SF Mono', 'Courier New', monospace;
+  }
+  .dl-hint {
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+    font-size: 10.5px;
+    color: var(--text-muted);
+    text-align: center;
+    font-family: 'SF Mono', 'Courier New', monospace;
+    opacity: 0.7;
+  }
+
+  /* ===== LOADING SCREEN (TERMINAL BOOT) ===== */
   .loader {
     position: fixed;
     inset: 0;
@@ -100,9 +231,7 @@
   }
   .loader-line .prompt { color: var(--accent); }
   .loader-line .ok { color: var(--success); }
-  @keyframes lineIn {
-    to { opacity: 1; }
-  }
+  @keyframes lineIn { to { opacity: 1; } }
   .loader-bar {
     margin-top: 20px;
     height: 3px;
@@ -116,9 +245,7 @@
     width: 0;
     animation: barFill 2s ease-out forwards;
   }
-  @keyframes barFill {
-    to { width: 100%; }
-  }
+  @keyframes barFill { to { width: 100%; } }
   .loader-skip {
     margin-top: 20px;
     font-size: 11px;
@@ -133,6 +260,96 @@
     cursor: pointer;
   }
   .loader-skip:hover { border-color: var(--accent); color: var(--text); }
+
+  /* ===== PROJECT TRANSITION ===== */
+  .project-transition {
+    position: fixed;
+    inset: 0;
+    background: #06060a;
+    z-index: 9998;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.4s ease, visibility 0.4s;
+  }
+  .project-transition.show { opacity: 1; visibility: visible; }
+  .pt-inner {
+    width: 100%;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 20px;
+  }
+  .pt-emoji {
+    font-size: 64px;
+    line-height: 1;
+    animation: ptEmoji 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  @keyframes ptEmoji {
+    from { opacity: 0; transform: scale(0.3) rotate(-20deg); }
+    to { opacity: 1; transform: scale(1) rotate(0); }
+  }
+  .pt-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+  .pt-name {
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    color: var(--text);
+  }
+  .pt-sub {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-family: 'SF Mono', 'Courier New', monospace;
+    min-height: 20px;
+  }
+  .pt-sub .dots::after {
+    content: '';
+    animation: dotsAnim 1.2s steps(4, end) infinite;
+  }
+  @keyframes dotsAnim {
+    0% { content: ''; }
+    25% { content: '.'; }
+    50% { content: '..'; }
+    75% { content: '...'; }
+  }
+  .pt-bar {
+    width: 100%;
+    height: 3px;
+    background: #1a1a22;
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .pt-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    width: 0;
+    transition: width 1.6s ease-out;
+  }
+  .project-transition.show .pt-bar-fill { width: 100%; }
+  .pt-cancel {
+    margin-top: 12px;
+    padding: 8px 20px;
+    border-radius: 999px;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    font-size: 12px;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+  .pt-cancel:hover { border-color: var(--accent); color: var(--text); }
 
   /* ===== NAVBAR ===== */
   .nav {
@@ -173,26 +390,15 @@
     gap: 24px;
     font-size: 13px;
   }
-  .nav-links a {
-    color: var(--text-muted);
-    transition: color 0.2s;
-  }
+  .nav-links a { color: var(--text-muted); transition: color 0.2s; }
   .nav-links a:hover { color: var(--text); }
-  @media (max-width: 640px) {
-    .nav-links { display: none; }
-  }
+  @media (max-width: 640px) { .nav-links { display: none; } }
 
   /* ===== CONTAINER ===== */
-  .container {
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 0 24px;
-  }
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
 
   /* ===== HERO ===== */
-  .hero {
-    padding: 80px 0 60px;
-  }
+  .hero { padding: 80px 0 60px; }
   .hero-inner {
     display: flex;
     flex-direction: column;
@@ -253,12 +459,7 @@
     max-width: 560px;
     line-height: 1.7;
   }
-  .hero-actions {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-    margin-top: 12px;
-  }
+  .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 12px; }
   .btn {
     display: inline-flex;
     align-items: center;
@@ -318,13 +519,8 @@
   }
 
   /* ===== SECTION ===== */
-  .section {
-    padding: 60px 0;
-    scroll-margin-top: 80px;
-  }
-  .section-head {
-    margin-bottom: 32px;
-  }
+  .section { padding: 60px 0; scroll-margin-top: 80px; }
+  .section-head { margin-bottom: 32px; }
   .section-label {
     font-size: 11px;
     font-weight: 700;
@@ -339,21 +535,11 @@
     letter-spacing: -0.8px;
     line-height: 1.15;
   }
-  .section-sub {
-    color: var(--text-muted);
-    margin-top: 8px;
-    max-width: 560px;
-  }
+  .section-sub { color: var(--text-muted); margin-top: 8px; max-width: 560px; }
 
   /* ===== FEATURED ===== */
-  .featured-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 20px;
-  }
-  @media (min-width: 768px) {
-    .featured-grid { grid-template-columns: repeat(2, 1fr); }
-  }
+  .featured-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
+  @media (min-width: 768px) { .featured-grid { grid-template-columns: repeat(2, 1fr); } }
   .featured-card {
     background: var(--bg-card);
     border: 1px solid var(--border);
@@ -368,10 +554,7 @@
     gap: 14px;
     min-height: 260px;
   }
-  .featured-card:hover {
-    border-color: var(--accent);
-    transform: translateY(-4px);
-  }
+  .featured-card:hover { border-color: var(--accent); transform: translateY(-4px); }
   .featured-card::before {
     content: '';
     position: absolute;
@@ -382,22 +565,9 @@
     transition: opacity 0.3s;
   }
   .featured-card:hover::before { opacity: 1; }
-  .featured-emoji {
-    font-size: 44px;
-    line-height: 1;
-    margin-bottom: 4px;
-  }
-  .featured-name {
-    font-size: 22px;
-    font-weight: 800;
-    letter-spacing: -0.5px;
-  }
-  .featured-desc {
-    color: var(--text-muted);
-    font-size: 14px;
-    flex: 1;
-    line-height: 1.6;
-  }
+  .featured-emoji { font-size: 44px; line-height: 1; margin-bottom: 4px; }
+  .featured-name { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
+  .featured-desc { color: var(--text-muted); font-size: 14px; flex: 1; line-height: 1.6; }
   .featured-link {
     display: inline-flex;
     align-items: center;
@@ -462,24 +632,10 @@
     from { opacity: 0; transform: translateY(12px); }
     to { opacity: 1; transform: translateY(0); }
   }
-  .project-card:hover {
-    border-color: var(--accent);
-    transform: translateY(-3px);
-  }
-  .project-head {
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-  }
-  .project-emoji {
-    font-size: 28px;
-    line-height: 1;
-    flex-shrink: 0;
-  }
-  .project-title-wrap {
-    flex: 1;
-    min-width: 0;
-  }
+  .project-card:hover { border-color: var(--accent); transform: translateY(-3px); }
+  .project-head { display: flex; align-items: flex-start; gap: 12px; }
+  .project-emoji { font-size: 28px; line-height: 1; flex-shrink: 0; }
+  .project-title-wrap { flex: 1; min-width: 0; }
   .project-name {
     font-size: 16px;
     font-weight: 700;
@@ -503,18 +659,8 @@
   .project-status.live { background: var(--success); box-shadow: 0 0 8px var(--success); }
   .project-status.wip { background: var(--warning); box-shadow: 0 0 8px var(--warning); }
   .project-status.archived { background: var(--text-muted); }
-  .project-desc {
-    color: var(--text-muted);
-    font-size: 13.5px;
-    line-height: 1.55;
-    flex: 1;
-  }
-  .project-tech {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 5px;
-    margin-top: 4px;
-  }
+  .project-desc { color: var(--text-muted); font-size: 13.5px; line-height: 1.55; flex: 1; }
+  .project-tech { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 4px; }
   .tech-tag {
     font-size: 10.5px;
     font-weight: 600;
@@ -575,11 +721,7 @@
     font-weight: 800;
     letter-spacing: -0.5px;
   }
-  .contact-card p {
-    color: var(--text-muted);
-    max-width: 460px;
-    font-size: 14px;
-  }
+  .contact-card p { color: var(--text-muted); max-width: 460px; font-size: 14px; }
   .social-row {
     display: flex;
     gap: 10px;
@@ -632,16 +774,38 @@
     transform: translateY(20px);
     transition: opacity 0.6s ease, transform 0.6s ease;
   }
-  .reveal.visible {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
 </style>
 </head>
 <body>
 
-<!-- ===== LOADING SCREEN ===== -->
-<div class="loader" id="loader">
+<!-- ===== FAKE DOWNLOAD SCREEN ===== -->
+<div class="downloader hide" id="downloader">
+  <div class="dl-card">
+    <div class="dl-header">
+      <div class="dl-icon">📦</div>
+      <div class="dl-meta">
+        <div class="dl-filename">santaneil-portfolio.zip</div>
+        <div class="dl-info"><span id="dl-size">12.4 MB</span> · v1.0</div>
+      </div>
+    </div>
+    <div class="dl-progress-row">
+      <span class="dl-percent" id="dl-percent">0%</span>
+      <span class="dl-status" id="dl-status">Mengunduh...</span>
+    </div>
+    <div class="dl-bar">
+      <div class="dl-bar-fill" id="dl-bar-fill"></div>
+    </div>
+    <div class="dl-stats">
+      <span id="dl-speed">-- MB/s</span>
+      <span id="dl-time">-- s tersisa</span>
+    </div>
+    <div class="dl-hint">$ decrypting portfolio data...</div>
+  </div>
+</div>
+
+<!-- ===== TERMINAL BOOT LOADER ===== -->
+<div class="loader hide" id="loader">
   <div class="loader-content">
     <div class="loader-logo">SantaNiel</div>
     <div class="loader-sub">PORTFOLIO v1.0</div>
@@ -652,6 +816,18 @@
     <div class="loader-line" style="animation-delay: 1.6s"><span class="prompt">$</span> Welcome, bre! <span class="ok">👋</span></div>
     <div class="loader-bar"><div class="loader-bar-fill"></div></div>
     <button class="loader-skip" onclick="skipLoader()">Lewati →</button>
+  </div>
+</div>
+
+<!-- ===== PROJECT TRANSITION ===== -->
+<div class="project-transition" id="project-transition">
+  <div class="pt-inner">
+    <div class="pt-emoji" id="pt-emoji">🚀</div>
+    <div class="pt-label">Membuka Project</div>
+    <div class="pt-name" id="pt-name">Project Name</div>
+    <div class="pt-sub" id="pt-sub">Menghubungkan ke server<span class="dots"></span></div>
+    <div class="pt-bar"><div class="pt-bar-fill" id="pt-bar-fill"></div></div>
+    <button class="pt-cancel" onclick="cancelTransition()">Batal</button>
   </div>
 </div>
 
@@ -777,7 +953,7 @@
 
 <script>
 // ============================================================
-// ============== EDIT DATA DI SINI AJA BRE ==================
+// ===================== DATA ================================
 // ============================================================
 
 const PROFILE = {
@@ -789,20 +965,6 @@ const PROFILE = {
     "yang project-nya iseng tapi serius.",
   ],
 };
-
-// ============================================================
-// ===================== LIST PROJECT ========================
-// ============================================================
-// Cara nambah project baru:
-// 1. Copy salah satu object di bawah
-// 2. Paste di paling atas (biar muncul duluan)
-// 3. Isi field-nya
-// 4. Commit & deploy
-//
-// status: "live" | "wip" | "archived"
-// featured: true/false (buat nampilin di section Featured)
-// category: bisa satu atau banyak, pisah pakai koma
-// ============================================================
 
 const PROJECTS = [
   {
@@ -860,23 +1022,7 @@ const PROJECTS = [
     link: "https://susurk-market-vercel.app",
     tech: ["Next.js", "Drizzle", "Neon", "TypeScript"],
   },
-  // === TAMBAHIN PROJECT BARU DI SINI ===
-  // {
-  //   id: "nama-unik",
-  //   name: "Nama Project",
-  //   emoji: "🎯",
-  //   description: "Deskripsi singkat 1-2 baris.",
-  //   category: ["AI"], // bisa ["Fun", "Learning"]
-  //   status: "live", // "live" | "wip" | "archived"
-  //   featured: false, // true buat nampilin di Featured
-  //   link: "https://...",
-  //   tech: ["Tech1", "Tech2"],
-  // },
 ];
-
-// ============================================================
-// ====================== SKILLS =============================
-// ============================================================
 
 const SKILLS = [
   { name: "HTML", emoji: "🌐" },
@@ -892,10 +1038,6 @@ const SKILLS = [
   { name: "Git & GitHub", emoji: "📦" },
   { name: "Vercel", emoji: "☁️" },
 ];
-
-// ============================================================
-// ====================== CONTACT ============================
-// ============================================================
 
 const SOCIALS = [
   {
@@ -921,20 +1063,77 @@ const SOCIALS = [
 ];
 
 // ============================================================
-// =============== LOGIC (JANGAN DIUBAH) =====================
+// =============== FLOW: DOWNLOAD → BOOT → PORTFOLIO =========
 // ============================================================
+
+function startFakeDownload() {
+  const bar = document.getElementById('dl-bar-fill');
+  const percentEl = document.getElementById('dl-percent');
+  const statusEl = document.getElementById('dl-status');
+  const speedEl = document.getElementById('dl-speed');
+  const timeEl = document.getElementById('dl-time');
+  const sizeEl = document.getElementById('dl-size');
+
+  const totalSize = (10 + Math.random() * 8).toFixed(1);
+  sizeEl.textContent = totalSize + ' MB';
+
+  let current = 0;
+  const totalDuration = 2400;
+  const interval = 50;
+
+  const timer = setInterval(() => {
+    const jitter = Math.random() * 1.8;
+    const step = 1.2 + jitter;
+    current = Math.min(100, current + step);
+
+    bar.style.width = current + '%';
+    percentEl.textContent = Math.floor(current) + '%';
+
+    const speed = (1.5 + Math.random() * 2.5).toFixed(1);
+    speedEl.textContent = speed + ' MB/s';
+
+    const remaining = Math.max(0, (totalDuration * (1 - current / 100)) / 1000);
+    timeEl.textContent = remaining.toFixed(1) + 's tersisa';
+
+    if (current < 60) statusEl.textContent = 'Mengunduh...';
+    else if (current < 85) statusEl.textContent = 'Mengunduh...';
+    else if (current < 99) statusEl.textContent = 'Meng-extract...';
+    else statusEl.textContent = 'Selesai ✓';
+
+    if (current >= 100) {
+      clearInterval(timer);
+      setTimeout(() => {
+        document.getElementById('downloader').classList.add('hide');
+        setTimeout(() => {
+          startTerminalBoot();
+        }, 400);
+      }, 500);
+    }
+  }, interval);
+}
+
+function startTerminalBoot() {
+  const loader = document.getElementById('loader');
+  loader.classList.remove('hide');
+
+  const bar = document.querySelector('.loader-bar-fill');
+  if (bar) {
+    bar.style.animation = 'none';
+    void bar.offsetWidth;
+    bar.style.animation = 'barFill 2s ease-out forwards';
+  }
+
+  setTimeout(skipLoader, 2400);
+}
 
 function skipLoader() {
   document.getElementById('loader').classList.add('hide');
   sessionStorage.setItem('visited', '1');
 }
-window.addEventListener('load', () => {
-  if (sessionStorage.getItem('visited')) {
-    document.getElementById('loader').classList.add('hide');
-    return;
-  }
-  setTimeout(skipLoader, 2400);
-});
+
+// ============================================================
+// ===================== TYPING EFFECT =======================
+// ============================================================
 
 function typeEffect() {
   const el = document.getElementById('typed-text');
@@ -969,6 +1168,70 @@ function typeEffect() {
   setTimeout(step, 2600);
 }
 
+// ============================================================
+// ================== PROJECT TRANSITION =====================
+// ============================================================
+
+let transitionTimer = null;
+let transitionTargetUrl = null;
+
+function openProject(projectId, event) {
+  if (event) event.preventDefault();
+  const project = PROJECTS.find(p => p.id === projectId);
+  if (!project || !project.link) return false;
+
+  if (event && (event.ctrlKey || event.metaKey)) {
+    window.open(project.link, '_blank');
+    return false;
+  }
+
+  const overlay = document.getElementById('project-transition');
+  document.getElementById('pt-emoji').textContent = project.emoji;
+  document.getElementById('pt-name').textContent = project.name;
+  document.getElementById('pt-sub').innerHTML = 'Menghubungkan ke server<span class="dots"></span>';
+
+  const bar = document.getElementById('pt-bar-fill');
+  bar.style.transition = 'none';
+  bar.style.width = '0';
+  void bar.offsetWidth;
+  bar.style.transition = 'width 1.6s ease-out';
+
+  overlay.classList.add('show');
+  setTimeout(() => { bar.style.width = '100%'; }, 50);
+
+  transitionTargetUrl = project.link;
+
+  setTimeout(() => {
+    document.getElementById('pt-sub').innerHTML = 'Hampir siap<span class="dots"></span>';
+  }, 800);
+
+  setTimeout(() => {
+    document.getElementById('pt-sub').innerHTML = 'Membuka project<span class="dots"></span>';
+  }, 1400);
+
+  transitionTimer = setTimeout(() => {
+    window.location.href = transitionTargetUrl;
+  }, 1800);
+
+  return false;
+}
+
+function cancelTransition() {
+  if (transitionTimer) {
+    clearTimeout(transitionTimer);
+    transitionTimer = null;
+  }
+  transitionTargetUrl = null;
+  document.getElementById('project-transition').classList.remove('show');
+  const bar = document.getElementById('pt-bar-fill');
+  bar.style.transition = 'none';
+  bar.style.width = '0';
+}
+
+// ============================================================
+// ===================== RENDER FUNCTIONS ====================
+// ============================================================
+
 function renderFeatured() {
   const grid = document.getElementById('featured-grid');
   const featured = PROJECTS.filter(p => p.featured).slice(0, 2);
@@ -977,7 +1240,7 @@ function renderFeatured() {
     return;
   }
   grid.innerHTML = featured.map(p => `
-    <a class="featured-card" href="${p.link || '#'}" ${p.link ? 'target="_blank" rel="noopener"' : ''}>
+    <a class="featured-card" href="${p.link || '#'}" ${p.link ? `onclick="return openProject('${p.id}', event)"` : ''}>
       <div class="featured-emoji">${p.emoji}</div>
       <div class="featured-name">${p.name}</div>
       <div class="featured-desc">${p.description}</div>
@@ -1019,7 +1282,7 @@ function renderProjects(filter = 'All') {
     return;
   }
   grid.innerHTML = list.map((p, i) => `
-    <a class="project-card" href="${p.link || '#'}" ${p.link ? 'target="_blank" rel="noopener"' : ''} style="animation-delay: ${i * 50}ms">
+    <a class="project-card" href="${p.link || '#'}" ${p.link ? `onclick="return openProject('${p.id}', event)"` : ''} style="animation-delay: ${i * 50}ms">
       <div class="project-head">
         <div class="project-emoji">${p.emoji}</div>
         <div class="project-title-wrap">
@@ -1085,6 +1348,10 @@ function setupReveal() {
   document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 }
 
+// ============================================================
+// ===================== INIT ================================
+// ============================================================
+
 function init() {
   document.getElementById('year').textContent = new Date().getFullYear();
   renderFeatured();
@@ -1097,6 +1364,16 @@ function init() {
   typeEffect();
 }
 init();
+
+// === START FLOW ===
+if (sessionStorage.getItem('visited')) {
+  document.getElementById('downloader').classList.add('hide');
+  document.getElementById('loader').classList.add('hide');
+} else {
+  document.getElementById('downloader').classList.remove('hide');
+  document.getElementById('loader').classList.add('hide');
+  startFakeDownload();
+}
 </script>
 
 </body>
